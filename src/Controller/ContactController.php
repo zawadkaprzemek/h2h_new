@@ -48,7 +48,7 @@ class ContactController extends AbstractController
     {
         $list = $this->entityManager->getRepository(ContactMessage::class)->findAll();
 
-        return $this->json($list);
+        return $this->json(['list' => $list]);
     }
 
 

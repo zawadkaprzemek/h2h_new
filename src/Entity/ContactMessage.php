@@ -2,13 +2,37 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
 use App\Repository\ContactMessageRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
-#use OpenApi\Attributes as OA;
 
 #[ORM\Entity(repositoryClass: ContactMessageRepository::class)]
+#[ApiResource(
+    shortName: 'ContactMessage',
+    description: 'Obsługa formularza i dane zapisane',
+    operations: [
+        new GetCollection(
+            uriTemplate: '/contact/list',
+            shortName: 'Lista wiadomości',
+            description: 'Wyświetlanie listy zapisanych danych z formularza',
+        ),
+        new Post(
+            uriTemplate: '/contact/form',
+            shortName: 'Formularz przyjmowania wiadomości',
+            description: 'Obsługa wysyłki formularza kontaktowego',
+        ),
+    ],
+    formats: [
+        'jsonld',
+    ],
+    paginationItemsPerPage: 10,
+)]
 class ContactMessage
 {
     #[ORM\Id]
@@ -18,23 +42,46 @@ class ContactMessage
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: 'Nie wprowadzono imienia i nazwiska')]
-    ##[OA\Property(description: 'Imię i nazwisko', type: 'string', maxLength: 255)]
+    #[Groups(['contact:write'])]
+    #[ApiProperty(
+        openapiContext: [
+            'type' => 'string',
+            'example' => 'Randy Orton'
+        ]
+    )]
     private ?string $fullName = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: 'Nie wprowadzono adresu e-mail')]
     #[Assert\Email(message: 'Wprowadzona wartość {{ value }} nie jest poprawnym adresem email')]
-    ##[OA\Property(description: 'Email', type: 'string', maxLength: 255)]
+    #[Groups(['contact:write'])]
+    #[ApiProperty(
+        openapiContext: [
+            'type' => 'string',
+            'example' => 'rko@wwe.com'
+        ]
+    )]
     private ?string $email = null;
 
     #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank(message: 'Nie wprowadzono treści wiadomości')]
-    ##[OA\Property(description: 'Treść wiadomości', type: 'string')]
+    #[ApiProperty(
+        openapiContext: [
+            'type' => 'string',
+            'example' => 'The Apex Predator'
+        ]
+    )]
     private ?string $message = null;
 
     #[ORM\Column]
     #[Assert\IsTrue(message: 'Brak zgody na przetwarzanie danych')]
-    ##[OA\Property(description: 'Zgoda na przetwarzanie danych osobowych', type: 'boolean')]
+    #[Groups(['contact:write'])]
+    #[ApiProperty(
+        openapiContext: [
+            'type' => 'boolean',
+            'example' => true
+        ]
+    )]
     private ?bool $consent = null;
 
     public function getId(): ?int
