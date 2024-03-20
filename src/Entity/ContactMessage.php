@@ -20,7 +20,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new GetCollection(
             uriTemplate: '/contact/list',
             shortName: 'Lista wiadomości',
-            description: 'Wyświetlanie listy zapisanych danych z formularza',
+            description: 'Wyświetlanie listy zapisanych danych z formularza'
         ),
         new Post(
             uriTemplate: '/contact/form',
@@ -28,9 +28,8 @@ use Symfony\Component\Validator\Constraints as Assert;
             description: 'Obsługa wysyłki formularza kontaktowego',
         ),
     ],
-    formats: [
-        'jsonld',
-    ],
+    formats: ['json' => ['application/json']],
+    normalizationContext: ['groups' => ['contact:write']],
     paginationItemsPerPage: 10,
 )]
 class ContactMessage
@@ -38,6 +37,7 @@ class ContactMessage
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['contact:write'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -65,6 +65,7 @@ class ContactMessage
 
     #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank(message: 'Nie wprowadzono treści wiadomości')]
+    #[Groups(['contact:write'])]
     #[ApiProperty(
         openapiContext: [
             'type' => 'string',

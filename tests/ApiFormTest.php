@@ -15,26 +15,39 @@ class ApiFormTest extends ApiTestCase
 
     public function testSuccessRequest(): void
     {
-        $response = static::createClient()->request(self::FORM_METHOD, self::FORM_URL, ['json'=>[
-            'fullName' => 'John Cena',
-            'email' => 'test@test.com',
-            'message' => 'Testowa wiadomosc',
-            'consent' => true,
-        ]
+        $response = static::createClient()->request(self::FORM_METHOD, self::FORM_URL, ['json' =>
+            [
+                'fullName' => 'John Cena',
+                'email' => 'test@test.com',
+                'message' => 'Testowa wiadomosc',
+                'consent' => true,
+            ],
+            'headers' => [
+                'content-type' => 'application/json',
+                'accept' => '*/*'
+            ]
         ]);
 
+        $responseData = json_decode($response->getContent(), true);
+
         $this->assertResponseStatusCodeSame(201);
-        $this->assertJsonContains(['message' => 'Dziękujemy za przesłaną wiadomość, niedługo odpowiemy na Państwa wiadomość ;)']);
+        $this->assertArrayHasKey('id', $responseData);
+        $this->assertIsNumeric($responseData['id']);
     }
 
     public function testFailureRequest(): void
     {
-        $response = static::createClient()->request(self::FORM_METHOD, self::FORM_URL, ['json'=>[
-            'fullName' => 'John Cena',
-            'email' => 'test@test.com',
-            'message' => 'Testowa wiadomosc',
-            'consent' => false,
-        ]
+        $response = static::createClient()->request(self::FORM_METHOD, self::FORM_URL, ['json' =>
+            [
+                'fullName' => 'John Cena',
+                'email' => 'test@test.com',
+                'message' => 'Testowa wiadomosc',
+                'consent' => false,
+            ],
+            'headers' => [
+                'content-type' => 'application/json',
+                'accept' => '*/*'
+            ]
         ]);
 
         $this->assertResponseStatusCodeSame(400);
